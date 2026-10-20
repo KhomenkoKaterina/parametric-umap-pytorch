@@ -4,7 +4,7 @@ Parametric UMAP — Global Probability Pre-computation
 
     python generate_global_probabilities.py
 
-RUN THIS AFTER you have implemented `student_tasks.py`, and BEFORE
+RUN THIS AFTER you have implemented `UMAP.py`, and BEFORE
 `boilerplate.py`. It uses your functions to build the fuzzy neighbourhood
 graph `p_ij` once, over the WHOLE 54,000-image training subset, and saves it
 to disk. Training then looks up the relevant sub-block per batch instead of
@@ -28,7 +28,7 @@ possible pairs -- a density of about 0.05%. We store it as a SciPy sparse
 matrix, roughly 13 MB on disk.
 
 Everything below is fully implemented. You do not need to edit this file; you
-just need `student_tasks.py` to be correct, because this script calls straight
+just need `UMAP.py` to be correct, because this script calls straight
 into it:
 
     find_sigma            -> the per-point bandwidth sigma_i
@@ -89,8 +89,8 @@ def pick_device(requested: str = "auto") -> torch.device:
 
 
 def verify_student_code() -> None:
-    """Fail fast, with a readable message, if `student_tasks.py` is incomplete."""
-    from student_tasks import (
+    """Fail fast, with a readable message, if `UMAP.py` is incomplete."""
+    from UMAP import (
         compute_asymmetric_p,
         compute_symmetric_p,
         find_sigma,
@@ -105,7 +105,7 @@ def verify_student_code() -> None:
         compute_symmetric_p(compute_asymmetric_p(d, rho, sigma))
     except NotImplementedError as exc:
         raise SystemExit(
-            "\n  student_tasks.py is not finished yet.\n\n"
+            "\n  UMAP.py is not finished yet.\n\n"
             "  This script needs find_sigma, compute_asymmetric_p and\n"
             "  compute_symmetric_p. Implement them, check with\n"
             "  `python selfcheck.py`, then run this again.\n"
@@ -273,7 +273,7 @@ def compute_directed_weights(
     (sigma, p_directed) : `(N,)` bandwidths and `(N, k)` weights p_{j|i}
     aligned with `knn_indices`.
     """
-    from student_tasks import compute_asymmetric_p, find_sigma
+    from UMAP import compute_asymmetric_p, find_sigma
 
     n, k = knn_distances.shape
     sigma = torch.empty(n, dtype=torch.float32)
@@ -338,7 +338,7 @@ def validate_symmetrisation(
     transposition, so symmetrising the sub-block and taking the sub-block of
     the symmetrised matrix must agree exactly.
     """
-    from student_tasks import compute_symmetric_p
+    from UMAP import compute_symmetric_p
 
     size = min(size, p_asymmetric.shape[0])
     index = np.arange(size)
@@ -407,7 +407,7 @@ def main() -> None:
     print("\n[2/4] exact k-nearest neighbours")
     knn_distances, knn_indices = compute_knn(images, args.n_neighbors, device)
 
-    print("\n[3/4] sigma and directed weights (your student_tasks.py)")
+    print("\n[3/4] sigma and directed weights (your UMAP.py)")
     sigma, p_directed = compute_directed_weights(
         knn_distances, args.n_neighbors, args.block_size
     )
