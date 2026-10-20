@@ -12,7 +12,7 @@ exception: the clearly marked TODO block inside `training_step`.
     python boilerplate.py
 
 The UMAP target graph `p_ij` is built ONCE over the whole 54k training subset
-by `generate_global_probabilities.py`, which calls your `student_tasks.py`.
+by `generate_global_probabilities.py`, which calls your `UMAP.py`.
 Training loads that sparse graph and, for each batch, looks up the (B, B)
 sub-block for the samples it contains -- which is why the training DataLoader
 yields `(image, label, index)` rather than just `(image, label)`.
@@ -249,7 +249,7 @@ def load_global_p(
             f"\n  No global probability graph at '{path}'.\n\n"
             f"  Build it first:\n\n"
             f"      python generate_global_probabilities.py\n\n"
-            f"  It needs a finished student_tasks.py, so run\n"
+            f"  It needs a finished UMAP.py, so run\n"
             f"  `python selfcheck.py` first if you are unsure.\n"
         )
 
@@ -292,7 +292,7 @@ def get_dataloader(
 
     The loader yields raw `(B, 1, 28, 28)` image tensors, untouched. Flattening
     to `(B, 784)` is deliberately left to you -- it is part of
-    `compute_min_pairwise_distance` in `student_tasks.py`.
+    `compute_min_pairwise_distance` in `UMAP.py`.
 
     Shuffling is driven by an explicitly seeded generator rather than the
     global torch RNG. That matters: with the global RNG, the batch order would
@@ -512,7 +512,7 @@ class ParametricUMAP(L.LightningModule):
         # (a, b) define the low-dimensional similarity kernel. They depend only
         # on `min_dist` / `spread`, so they are fitted ONCE here rather than
         # per batch. Requires `find_a_b` to be implemented.
-        from student_tasks import find_a_b
+        from UMAP import find_a_b
 
         a, b = find_a_b(min_dist=min_dist, spread=spread)
         # Buffers, not parameters: they travel with the model to GPU and into
@@ -568,7 +568,7 @@ class ParametricUMAP(L.LightningModule):
 
         z_head = self(head_images)  # (E, 2)
         z_tail = self(tail_images)  # (E, 2)
-        from student_tasks import umap_loss
+        from UMAP import umap_loss
 
         def compute_q(u: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
             sq_dist = ((u - v) ** 2).sum(dim=-1)
@@ -595,11 +595,11 @@ class ParametricUMAP(L.LightningModule):
         #
         # Everything above and below this block is done. You must now build
         # the loss by IMPORTING AND CALLING the function you wrote in
-        # `student_tasks.py`.
+        # `UMAP.py`.
         #
         # Add this import at the top of the file:
         #
-        #     from student_tasks import umap_loss
+        #     from UMAP import umap_loss
         #
         # ---- STEP 1: the low-dimensional similarity kernel ----------------
         #
@@ -664,7 +664,7 @@ class ParametricUMAP(L.LightningModule):
     #      accuracy measures the thing you actually care about — whether the
     #      manifold's neighbourhood structure survived the projection to 2D.
     #
-    #   2. It needs none of your `student_tasks.py` code, so the validation
+    #   2. It needs none of your `UMAP.py` code, so the validation
     #      loop keeps working (and keeps telling you something useful) even
     #      while you are still debugging the loss.
     #
@@ -813,7 +813,7 @@ def main() -> None:
         f"  val_knn_acc = {best_score.item():.4f}  "
         f"(epoch with the highest held-out score, not the last epoch)"
     )
-    print("Submit this checkpoint together with your student_tasks.py.")
+    print("Submit this checkpoint together with your UMAP.py.")
 
 
 if __name__ == "__main__":
