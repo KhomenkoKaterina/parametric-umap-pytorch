@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+data/
+checkpoints/
+artifacts/
+*.ckpt
+lightning_logs/
+.ipynb_checkpoints/
+.venv/
+venv/
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
